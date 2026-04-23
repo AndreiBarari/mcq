@@ -50,6 +50,12 @@
         "projectId": "2cbbf7ac-e617-42c8-8a54-fa752dc5d444"
       }
     },
-    "owner": "anbaracorp"
+    "owner": "anbaracorp",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2cbbf7ac-e617-42c8-8a54-fa752dc5d444"
+    }
   }
 }
