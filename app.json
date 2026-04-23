@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "medieval-code-quest",
-    "slug": "medieval-code-quest",
+    "slug": "mcq",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -43,6 +43,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2cbbf7ac-e617-42c8-8a54-fa752dc5d444"
+      }
+    },
+    "owner": "anbaracorp"
   }
 }

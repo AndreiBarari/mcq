@@ -4,12 +4,12 @@ import React from "react";
 import {
   Dimensions,
   Platform,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Character from "../components/Character";
 import useGameStore from "../store/useGameStore";
 

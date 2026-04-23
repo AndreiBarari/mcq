@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
@@ -69,7 +70,7 @@ const LevelMapScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
 
       {/* ── Header ─────────────────────────────────────────── */}
       <View style={styles.header}>
@@ -158,7 +159,7 @@ const LevelMapScreen = () => {
           );
         })}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ebd5b3',
   },
   header: {
-    paddingTop: 50,
+    paddingTop: 16,
     paddingBottom: 20,
     backgroundColor: '#8b5a2b',
     flexDirection: 'row',

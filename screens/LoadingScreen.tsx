@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const LoadingScreen = () => {
@@ -23,13 +24,13 @@ const LoadingScreen = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Animated.View style={{ transform: [{ rotate: spin }] }}>
         <FontAwesome5 name="compass" size={80} color="#FFD700" />
       </Animated.View>
       <Text style={styles.loadingText}>Entering the Realm...</Text>
       <Text style={styles.subText}>Preparing your spells and potions</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 

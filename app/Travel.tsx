@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -58,7 +59,7 @@ const Travel = () => {
   }));
 
   return (
-    <View style={styles.background}>
+    <SafeAreaView style={styles.background}>
       <Animated.View style={[styles.container, animatedContainerStyle]}>
         <Animated.View style={[styles.iconBox, animatedSpin]}>
           <FontAwesome5 name="compass" size={64} color="#FFD700" />
@@ -77,7 +78,7 @@ const Travel = () => {
           />
         </View>
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 };
 

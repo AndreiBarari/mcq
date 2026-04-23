@@ -9,6 +9,7 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import useGameStore from '../store/useGameStore';
 import RewardModal from '../components/RewardModal';
 
@@ -108,12 +109,6 @@ function DraggableChip({ label, index, total, onRemove, onReorder, disabled }) {
 
 // ── Main screen ───────────────────────────────────────────────────────────
 export default function GameLevelScreen() {
-  const isSessionActive = useGameStore((state: any) => state.isSessionActive);
-
-  if (!isSessionActive) {
-    return <Redirect href="/" />;
-  }
-
   const {
     currentLevel,
     userSequence,
@@ -133,8 +128,13 @@ export default function GameLevelScreen() {
     resetPosition,
   } = useGameStore();
 
+  const isSessionActive = useGameStore((state: any) => state.isSessionActive);
   const router = useRouter();
   const [showHomeConfirm, setShowHomeConfirm] = useState(false);
+
+  if (!isSessionActive) {
+    return <Redirect href="/" />;
+  }
 
   const handleGoHome = () => {
     if (!isExecuting) setShowHomeConfirm(true);
@@ -208,7 +208,7 @@ export default function GameLevelScreen() {
   return (
     // GestureHandlerRootView is required for Reanimated Gesture logic to capture touches securely
     <GestureHandlerRootView style={styles.container}>
-      
+      <SafeAreaView style={{ flex: 1 }}>
       {/* TOP HALF: Game Stage */}
       <View style={styles.topHalf}>
         {/* Mini top bar: home | level label | reset */}
@@ -217,8 +217,12 @@ export default function GameLevelScreen() {
             <FontAwesome5 name="home" size={16} color="#FFD700" />
           </TouchableOpacity>
           <Text style={styles.levelLabel}>Level {currentLevel}</Text>
-          <TouchableOpacity style={[styles.topBarBtn, { borderColor: '#8d6e63' }]} onPress={resetPosition} disabled={isExecuting}>
-            <FontAwesome5 name="undo" size={16} color="#FFF" />
+          <TouchableOpacity 
+            style={styles.topBarBtn} 
+            onPress={() => router.replace({ pathname: '/Travel', params: { to: '/LevelMap', msg: 'Back to the World Map...' } } as any)} 
+            disabled={isExecuting}
+          >
+            <FontAwesome5 name="map-marked-alt" size={16} color="#FFD700" />
           </TouchableOpacity>
         </View>
         <View style={styles.gridContainer}>
@@ -284,13 +288,13 @@ export default function GameLevelScreen() {
             <Text style={styles.runButtonText}>{isExecuting ? 'CASTING...' : 'RUN SPELL'}</Text>
           </TouchableOpacity>
 
-          {/* Level Map */}
+          {/* Reset Hero */}
           <TouchableOpacity
-            style={styles.sideActionBtn}
-            onPress={() => router.replace({ pathname: '/Travel', params: { to: '/LevelMap', msg: 'Back to the World Map...' } } as any)}
+            style={[styles.sideActionBtn, { borderColor: '#8d6e63' }]}
+            onPress={resetPosition}
             disabled={isExecuting}
           >
-            <FontAwesome5 name="map-marked-alt" size={20} color="#FFD700" />
+            <FontAwesome5 name="undo" size={20} color="#FFF" />
           </TouchableOpacity>
 
         </View>
@@ -319,6 +323,7 @@ export default function GameLevelScreen() {
           </View>
         </View>
       )}
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
