@@ -111,7 +111,7 @@ const LevelMapScreen = () => {
             if (level.isBoss) { iconName = 'skull'; iconSize = 36; }
           }
 
-          const isPlayable = level.status !== 'locked';
+          const isPlayable = true; // For testing: make all levels available
 
           const NodeButton = (
             <TouchableOpacity

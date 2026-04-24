@@ -285,7 +285,7 @@ export default function GameLevelScreen() {
           {/* Run Spell */}
           <TouchableOpacity style={styles.runButton} onPress={handleRunSpell} disabled={isExecuting}>
             <FontAwesome5 name={isExecuting ? 'hourglass-half' : 'play'} size={20} color="#FFD700" style={{ marginRight: 10 }} />
-            <Text style={styles.runButtonText}>{isExecuting ? 'CASTING...' : 'RUN SPELL'}</Text>
+            <Text style={styles.runButtonText}>{isExecuting ? 'CASTING...' : 'CAST'}</Text>
           </TouchableOpacity>
 
           {/* Reset Hero */}
