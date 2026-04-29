@@ -31,8 +31,8 @@ export default function Character({ position, charClass }) {
   }));
 
   const isMage = charClass === 'Mage';
-  const bodyColor  = isMage ? '#3B82F6' : '#EF4444';
-  const accentColor = isMage ? '#8B5CF6' : '#9CA3AF';
+  const bodyColor  = isMage ? '#94A3B8' : '#EF4444';
+  const accentColor = isMage ? '#475569' : '#9CA3AF';
 
   return (
     <Animated.View
@@ -45,7 +45,7 @@ export default function Character({ position, charClass }) {
       {/* ── Hat / Helmet ── */}
       {isMage ? (
         // Pointy wizard hat: CSS border triangle trick
-        <View style={styles.mageHat} />
+        <View style={[styles.mageHat, { borderBottomColor: accentColor }]} />
       ) : (
         // Flat warrior helmet
         <View style={[styles.helmet, { backgroundColor: accentColor }]} />
@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 36,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#8B5CF6',
     marginBottom: -4,
     zIndex: 1,
   },
