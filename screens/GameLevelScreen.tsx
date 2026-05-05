@@ -13,46 +13,24 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useGameStore from '../store/useGameStore';
 import RewardModal from '../components/RewardModal';
 
-const { width } = Dimensions.get('window');
-const GRID_SIZE = 5;
-const CELL_SIZE = width * 0.16; // Responsive sizing
+import GridMap from '../components/GridMap';
+import TutorialPointer from '../components/TutorialPointer';
 
-// Drag and drop block component
-const DraggableBlock = ({ title, icon, onDrop }) => {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-
-  const pan = Gesture.Pan()
-    .onUpdate((event) => {
-      translateX.value = event.translationX;
-      translateY.value = event.translationY;
-    })
-    .onEnd((event) => {
-      // If dragged down by at least 60 pixels, assume it hit the drop zone below
-      if (event.translationY > 60) {
-        runOnJS(onDrop)(title);
-      }
-      // Spring back to original toolbox position
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
-    });
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
-    // Bring block to front while dragging
-    zIndex: translateY.value !== 0 ? 100 : 1, 
-  }));
-
+// Tap-to-add block component
+const CommandBlock = ({ title, icon, onTap, disabled, showPointer }: any) => {
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View style={[styles.toolboxBlock, animatedStyle]}>
+    <View style={{ position: 'relative' }}>
+      <TouchableOpacity 
+        style={[styles.toolboxBlock, disabled && { opacity: 0.4 }]} 
+        onPress={() => onTap(title)}
+        disabled={disabled}
+        activeOpacity={0.6}
+      >
         <FontAwesome5 name={icon} size={16} color="#FFF" style={styles.blockIcon} />
         <Text style={styles.blockText}>{title}</Text>
-      </Animated.View>
-    </GestureDetector>
+      </TouchableOpacity>
+      <TutorialPointer visible={showPointer} style={{ bottom: -35, left: '20%', transform: [{ scale: 0.8 }] }} />
+    </View>
   );
 };
 
@@ -112,13 +90,6 @@ export default function GameLevelScreen() {
   const {
     currentLevel,
     userSequence,
-    heroPosition,
-    targetPosition,
-    obstacles,
-    keyPosition,
-    doorPosition,
-    hasKey,
-    levelComplete,
     isExecuting,
     addUserSequenceStep,
     removeUserSequenceStep,
@@ -126,11 +97,19 @@ export default function GameLevelScreen() {
     clearUserSequence,
     executeSequence,
     resetPosition,
+    playSound,
+    tutorialStep,
+    setTutorialStep,
+    stopBgMusic,
   } = useGameStore();
 
   const isSessionActive = useGameStore((state: any) => state.isSessionActive);
   const router = useRouter();
   const [showHomeConfirm, setShowHomeConfirm] = useState(false);
+
+  React.useEffect(() => {
+    stopBgMusic();
+  }, []);
 
   if (!isSessionActive) {
     return <Redirect href="/" />;
@@ -140,8 +119,16 @@ export default function GameLevelScreen() {
     if (!isExecuting) setShowHomeConfirm(true);
   };
 
-  const handleDrop = (blockAction) => {
-    if (!isExecuting) addUserSequenceStep(blockAction);
+  const handleAddCommand = (blockAction) => {
+    if (!isExecuting) {
+      addUserSequenceStep(blockAction);
+      playSound(blockAction);
+      
+      // Level 1 Tutorial progression
+      if (currentLevel === 1 && tutorialStep === 1 && blockAction === 'Down') {
+        setTutorialStep(2);
+      }
+    }
   };
 
   const clearSequence = () => {
@@ -150,59 +137,11 @@ export default function GameLevelScreen() {
 
   const handleRunSpell = () => {
     if (userSequence.length > 0 && !isExecuting) {
+      if (currentLevel === 1 && tutorialStep === 2) {
+        setTutorialStep(3); // Hide the tutorial pointer permanently for this level run
+      }
       executeSequence();
     }
-  };
-
-  const renderGrid = () => {
-    let rows: any[] = [];
-    for (let r = 0; r < GRID_SIZE; r++) {
-      let cells = [];
-      for (let c = 0; c < GRID_SIZE; c++) {
-        let content = null;
-        
-        // 1. Render Hero using Zustand coordinates (x=col, y=row)
-        if (c === heroPosition.x && r === heroPosition.y) {
-          content = <FontAwesome5 name="hat-wizard" size={CELL_SIZE * 0.6} color="#3B82F6" style={{ zIndex: 10 }} />;
-        }
-        
-        // 2. Render Treasure (Star icon)
-        else if (c === targetPosition.x && r === targetPosition.y) {
-          content = <FontAwesome5 name="star" solid size={CELL_SIZE * 0.5} color="#FFD700" />;
-        }
-
-        // 3. Render Obstacles (Rocks)
-        else if (obstacles.some((obs: any) => obs.x === c && obs.y === r)) {
-          content = <FontAwesome5 name="mountain" size={CELL_SIZE * 0.5} color="#795548" />;
-        }
-
-        // 4. Render Key
-        else if (keyPosition && c === keyPosition.x && r === keyPosition.y && !hasKey) {
-          content = <FontAwesome5 name="key" size={CELL_SIZE * 0.4} color="#FFD700" />;
-        }
-
-        // 5. Render Door
-        else if (doorPosition && c === doorPosition.x && r === doorPosition.y) {
-          content = <FontAwesome5 
-            name={hasKey ? "door-open" : "door-closed"} 
-            size={CELL_SIZE * 0.5} 
-            color={hasKey ? "#4CAF50" : "#b71c1c"} 
-          />;
-        }
-
-        cells.push(
-          <View key={`${r}-${c}`} style={styles.gridCell}>
-            {content}
-          </View>
-        );
-      }
-      rows.push(
-        <View key={`row-${r}`} style={{ flexDirection: 'row' }}>
-          {cells}
-        </View>
-      );
-    }
-    return rows;
   };
 
   return (
@@ -225,20 +164,23 @@ export default function GameLevelScreen() {
             <FontAwesome5 name="map-marked-alt" size={16} color="#FFD700" />
           </TouchableOpacity>
         </View>
-        <View style={styles.gridContainer}>
-          {renderGrid()}
-        </View>
+        <GridMap />
       </View>
 
       {/* BOTTOM HALF: Coding Workspace */}
       <View style={styles.bottomHalf}>
         
-        {/* Toolbox / Library of permitted actions */}
+        {/* Toolbox / Library of permitted actions — tap to add */}
         <View style={styles.toolbox}>
-          <DraggableBlock title="Up" icon="arrow-up" onDrop={handleDrop} />
-          <DraggableBlock title="Down" icon="arrow-down" onDrop={handleDrop} />
-          <DraggableBlock title="Left" icon="arrow-left" onDrop={handleDrop} />
-          <DraggableBlock title="Right" icon="arrow-right" onDrop={handleDrop} />
+          <CommandBlock 
+            title="Up" icon="arrow-up" onTap={handleAddCommand} disabled={isExecuting} 
+          />
+          <CommandBlock 
+            title="Down" icon="arrow-down" onTap={handleAddCommand} disabled={isExecuting} 
+            showPointer={currentLevel === 1 && tutorialStep === 1}
+          />
+          <CommandBlock title="Left" icon="arrow-left" onTap={handleAddCommand} disabled={isExecuting} />
+          <CommandBlock title="Right" icon="arrow-right" onTap={handleAddCommand} disabled={isExecuting} />
         </View>
 
         {/* Spell Sequencer — drag chips left/right to reorder, tap ✕ to remove */}
@@ -283,10 +225,16 @@ export default function GameLevelScreen() {
           </TouchableOpacity>
 
           {/* Run Spell */}
-          <TouchableOpacity style={styles.runButton} onPress={handleRunSpell} disabled={isExecuting}>
-            <FontAwesome5 name={isExecuting ? 'hourglass-half' : 'play'} size={20} color="#FFD700" style={{ marginRight: 10 }} />
-            <Text style={styles.runButtonText}>{isExecuting ? 'CASTING...' : 'CAST'}</Text>
-          </TouchableOpacity>
+          <View style={{ position: 'relative', flex: 1 }}>
+            <TouchableOpacity style={styles.runButton} onPress={handleRunSpell} disabled={isExecuting}>
+              <FontAwesome5 name={isExecuting ? 'hourglass-half' : 'play'} size={20} color="#FFD700" style={{ marginRight: 10 }} />
+              <Text style={styles.runButtonText}>{isExecuting ? 'CASTING...' : 'CAST'}</Text>
+            </TouchableOpacity>
+            <TutorialPointer 
+              visible={currentLevel === 1 && tutorialStep === 2} 
+              style={{ top: '50%', left: '50%', marginTop: -15, marginLeft: -5, transform: [{ scale: 0.9 }] }} 
+            />
+          </View>
 
           {/* Reset Hero */}
           <TouchableOpacity
@@ -364,23 +312,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     fontFamily: 'serif',
-  },
-  gridContainer: {
-    backgroundColor: '#aed581',
-    borderWidth: 2,
-    borderColor: '#558b2f',
-    borderRadius: 8,
-    overflow: 'hidden',
-    alignSelf: 'center',
-    marginVertical: 8,
-  },
-  gridCell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    borderWidth: 1,
-    borderColor: 'rgba(85, 139, 47, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 
   // --- Workspace ---
@@ -484,6 +415,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 4,
+    gap: 16,
   },
   // Shared style for both side icon buttons (Clear & Map)
   sideActionBtn: {
@@ -582,6 +514,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#FFD700',
     alignItems: 'center',
+    justifyContent: 'center',
     ...Platform.select({
       web: { boxShadow: '0 4px 5px rgba(0, 0, 0, 0.5)' },
       default: {

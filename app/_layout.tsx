@@ -17,6 +17,7 @@ export default function RootLayout() {
           <Stack.Screen name="LevelMap" />
           <Stack.Screen name="GameLevel" />
           <Stack.Screen name="Travel" />
+          <Stack.Screen name="Wardrobe" />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
         <StatusBar style="auto" />

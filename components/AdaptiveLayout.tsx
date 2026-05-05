@@ -31,13 +31,19 @@ const AdaptiveLayout = ({ children }) => {
     </View>
   );
 
+  const { characterClass, currentLevel, experiencePoints } = useGameStore((state: any) => ({
+    characterClass: state.characterClass,
+    currentLevel: state.currentLevel,
+    experiencePoints: state.experiencePoints,
+  }));
+
   // Layout for 14+: Text-heavy, detailed RPG-style UI
   const renderTeenUI = () => (
     <View style={[styles.container, styles.teenContainer]}>
       <View style={styles.teenHeader}>
         <Text style={styles.teenHeaderText}>[ SYSTEM LOG ]</Text>
-        <Text style={styles.teenDetailText}>Class: {useGameStore.getState().characterClass} | Lvl: {useGameStore.getState().currentLevel}</Text>
-        <Text style={styles.teenDetailText}>EXP: {useGameStore.getState().experiencePoints}</Text>
+        <Text style={styles.teenDetailText}>Class: {characterClass} | Lvl: {currentLevel}</Text>
+        <Text style={styles.teenDetailText}>EXP: {experiencePoints}</Text>
       </View>
       <View style={styles.content}>
         {children}

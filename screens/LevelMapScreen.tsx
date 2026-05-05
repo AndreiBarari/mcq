@@ -14,9 +14,9 @@ import useGameStore from '../store/useGameStore';
 
 const { width } = Dimensions.get('window');
 
-const LEVELS_COUNT = 9;
-const BOSS_LEVELS  = [3, 6, 9];
-const ZIGZAG_MARGINS = [0, 60, 100, 60, 0, -60, -100, -60, 0];
+const LEVELS_COUNT = 15;
+const BOSS_LEVELS  = [5, 10, 15];
+const ZIGZAG_MARGINS = [0, 60, 100, 60, 0, -60, -100, -60, 0, 60, 100, 60, 0, -60, -100];
 
 const PulsingNode = ({ children, isBoss }: any) => {
   const scale = useSharedValue(1);
@@ -40,6 +40,11 @@ const LevelMapScreen = () => {
   const highestLevel    = useGameStore((state: any) => state.highestLevel);
   const isSessionActive = useGameStore((state: any) => state.isSessionActive);
   const setCurrentLevel = useGameStore((state: any) => state.setCurrentLevel);
+  const startBgMusic    = useGameStore((state: any) => state.startBgMusic);
+
+  useEffect(() => {
+    startBgMusic();
+  }, []);
 
   if (!isSessionActive) return <Redirect href="/" />;
 

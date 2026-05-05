@@ -13,7 +13,7 @@ import { useRouter, Link } from 'expo-router';
 import useGameStore from '../store/useGameStore';
 import LevelUpEffect from './LevelUpEffect';
 
-const BOSS_LEVELS = [3, 6, 9];
+const BOSS_LEVELS = [5, 10, 15];
 
 const RewardModal = () => {
   const router = useRouter();
